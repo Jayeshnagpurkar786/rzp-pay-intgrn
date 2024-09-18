@@ -1,10 +1,10 @@
 {
   "builds": [
     {
-      "src": "frontend/package.json",
+      "src": "payment/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "frontend/build"
+        "distDir": "payment/build"
       }
     },
     {
@@ -19,7 +19,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/frontend/$1"
+      "dest": "/payment/$1"
     }
   ]
 }
