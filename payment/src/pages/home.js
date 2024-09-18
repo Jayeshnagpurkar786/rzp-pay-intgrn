@@ -11,8 +11,8 @@ const Home = () => {
   // Fetch all orders from the backend
   const fetchOrders = async () => {
     try {
-      const res = await fetch(`${process.env.REACT_APP_BASE_URL}/getAllOrders`);
-      console.log(process.env.REACT_APP_BASE_URL);
+      const res = await fetch(`${process.env.BE_APP_BASE_URL}/getAllOrders`);
+      console.log(process.env.BE_APP_BASE_URL);
 
 
       if (!res.ok) {
@@ -37,7 +37,7 @@ const Home = () => {
     }
 
     try {
-      const res = await fetch(`${process.env.REACT_APP_BASE_URL}/create-order`, {
+      const res = await fetch(`${process.env.BE_APP_BASE_URL}/create-order`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -70,7 +70,7 @@ const Home = () => {
     }
 
     const options = {
-      key: process.env.REACT_APP_RAZORPAY_KEY_ID,
+      key: process.env.BE_APP_RAZORPAY_KEY_ID,
       amount: data.amount,
       currency: data.currency,
       name: "Payment Test Mode",
@@ -78,7 +78,7 @@ const Home = () => {
       order_id: data.id,
       handler: async (response) => {
         try {
-          const res = await fetch(`${process.env.REACT_APP_BASE_URL}/verify-payment`, {
+          const res = await fetch(`${process.env.BE_APP_BASE_URL}/verify-payment`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -122,7 +122,7 @@ const Home = () => {
     }
 
     try {
-      const res = await fetch(`${process.env.REACT_APP_BASE_URL}/refund`, {
+      const res = await fetch(`${process.env.BE_APP_BASE_URL}/refund`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
