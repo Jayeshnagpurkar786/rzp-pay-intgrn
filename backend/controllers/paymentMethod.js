@@ -3,8 +3,6 @@ const Razorpay = require("razorpay");
 const axios = require('axios');
 const { validateWebhookSignature } = require("razorpay/dist/utils/razorpay-utils");
 
-console.log('Pool object:', pool);
-
 
 // Initialize Razorpay instance
 const razorpay = new Razorpay({
@@ -174,14 +172,6 @@ async function getAllOrders(req, res) {
   }
 }
 
-//test query
-pool.query('SELECT NOW()', (err, res) => {
-  if (err) {
-    console.error('Error executing test query:', err);
-  } else {
-    console.log('Test query result:', res.rows);
-  }
-});
 
 
 module.exports = {
