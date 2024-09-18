@@ -1,25 +1,14 @@
 {
   "builds": [
     {
-      "src": "payment/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "payment/build"
-      }
-    },
-    {
       "src": "backend/app.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/backend/$1"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/payment/$1"
+      "dest": "/backend/app.js"
     }
   ]
 }
