@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
+
 const Home = () => {
   const [amount, setAmount] = useState("");
   const [payID, setPayID] = useState("");
@@ -10,15 +11,15 @@ const Home = () => {
   // Fetch all orders from the backend
   const fetchOrders = async () => {
     try {
-      const res = await fetch(`${process.env.REACT_APP_BASE_URL}/getAllUserData`);
-      console.log(process.env.REACT_APP_BASE_URL);
+      const res = await fetch(`${process.env.REACT_APP_BASE_URL_FRONTEND}/getAllOrders`);
+      console.log(process.env.REACT_APP_BASE_URL_FRONTEND);
+
 
       if (!res.ok) {
-        throw new Error(`Failed to fetch orders. Status: ${res.status}`);
+        throw new Error("Failed to fetch orders.");
       }
-
       const data = await res.json();
-      setOrders(data.data);
+      setOrders(data);
     } catch (error) {
       console.error("Fetch Orders Error:", error);
       toast.error("Failed to fetch orders.");
@@ -36,7 +37,7 @@ const Home = () => {
     }
 
     try {
-      const res = await fetch(`${process.env.REACT_APP_BASE_URL}/createOrder`, {
+      const res = await fetch(`${process.env.REACT_APP_BASE_URL_FRONTEND}/create-order`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -49,7 +50,7 @@ const Home = () => {
       }
 
       const data = await res.json();
-      handlePaymentVerify(data.data);
+      handlePaymentVerify(data);
 
       if (data) {
         setAmount("");
@@ -62,22 +63,22 @@ const Home = () => {
   };
 
   const handlePaymentVerify = async (data) => {
-    if (!data || !data.amount || !data.order_id) {
+    if (!data || !data.amount || !data.currency || !data.id) {
       console.error("Invalid payment data:", data);
       toast.error("Invalid payment data.");
       return;
     }
 
     const options = {
-      key: process.env.REACT_APP_RAZORPAY_KEY_ID,
+      key: process.env.REACT_APP_RAZORPAY_KEY_ID_FRONTEND,
       amount: data.amount,
-      currency: "INR", // Adjust currency if needed
+      currency: data.currency,
       name: "Payment Test Mode",
       description: "Test Mode",
-      order_id: data.order_id,
+      order_id: data.id,
       handler: async (response) => {
         try {
-          const res = await fetch(`${process.env.REACT_APP_BASE_URL}/verifyPayment`, {
+          const res = await fetch(`${process.env.REACT_APP_BASE_URL_FRONTEND}/verify-payment`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -95,7 +96,7 @@ const Home = () => {
 
           const verifyData = await res.json();
 
-          if (verifyData.success) {
+          if (verifyData) {
             toast.success("Payment Successful");
             setAmount("");
             fetchOrders(); // Refresh orders after successful payment verification
@@ -121,7 +122,7 @@ const Home = () => {
     }
 
     try {
-      const res = await fetch(`${process.env.REACT_APP_BASE_URL}/refundPayment`, {
+      const res = await fetch(`${process.env.REACT_APP_BASE_URL_FRONTEND}/refund`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -135,7 +136,7 @@ const Home = () => {
 
       const data = await res.json();
 
-      if (data.success) {
+      if (data) {
         toast.success("Refund Successful");
         setPayID("");
         setAmount2("");
@@ -147,6 +148,7 @@ const Home = () => {
     }
   };
 
+  //copy text
   const [copiedOrderId, setCopiedOrderId] = useState(null);
   const handleCopy = (paymentId, orderId) => {
     navigator.clipboard.writeText(paymentId).then(() => {
@@ -160,7 +162,7 @@ const Home = () => {
       <div className="flex flex-row mt-9 space-x-4">
         {/* Payment Section */}
         <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold mb-4">Payment</h1>
+          <h1 className="text-2xl font-bold mb-4">Payment </h1>
           <label
             htmlFor="amount"
             className="block text-sm font-medium text-gray-700 mb-2"
@@ -190,7 +192,7 @@ const Home = () => {
             htmlFor="payID"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
-            Payment ID
+            Razorpay ID
           </label>
           <input
             id="payID"
@@ -198,13 +200,13 @@ const Home = () => {
             value={payID}
             onChange={(e) => setPayID(e.target.value)}
             className="block w-full p-2 border border-gray-300 rounded-md mb-4"
-            placeholder="Enter payment ID"
+            placeholder="Enter Razorpay ID"
           />
           <label
             htmlFor="amount2"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
-            Amount
+            Refund Amount
           </label>
           <input
             id="amount2"
@@ -216,44 +218,60 @@ const Home = () => {
           />
           <button
             onClick={handleRefund}
-            className="w-full py-2 px-4 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600"
+            className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600"
           >
-            Refund Now
+            Refund
           </button>
         </div>
       </div>
 
-      {/* Display Orders */}
-      <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md mt-8">
-        <h1 className="text-2xl font-bold mb-4">Orders</h1>
-        <ul>
-          {orders.map((order) => (
-            <li key={order.order_id} className="mb-2">
-              <p className="text-sm text-gray-600">
-                <strong>Order ID:</strong> {order.order_id}
-              </p>
-              <p className="text-sm text-gray-600">
-                <strong>Payment ID:</strong> {order.payment_id}
-              </p>
-              <p className="text-sm text-gray-600">
-                <strong>Amount:</strong> ₹{order.amount}
-              </p>
-              <p className="text-sm text-gray-600">
-                <strong>Email:</strong> {order.email}
-              </p>
-              <p className="text-sm text-gray-600">
-                <strong>Contact:</strong> {order.contact}
-              </p>
-              <button
-                onClick={() => handleCopy(order.payment_id, order.order_id)}
-                className="mt-2 py-1 px-3 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
-              >
-                {copiedOrderId === order.order_id ? "Copied!" : "Copy Payment ID"}
-              </button>
-            </li>
-          ))}
-        </ul>
+      {/* Orders Section */}
+      <div className="w-full max-w-4xl bg-white mt-8 p-6 rounded-lg shadow-md">
+        <h1 className="text-2xl font-bold mb-4">All Orders</h1>
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white">
+            <thead>
+              <tr>
+                <th className="px-4 py-2 border">Order ID</th>
+                <th className="px-4 py-2 border">Amount</th>
+                <th className="px-4 py-2 border">Currency</th>
+                <th className="px-4 py-2 border">Status</th>
+                <th className="px-4 py-2 border">Payment ID</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((order) => (
+                <tr key={order.order_id}>
+                  <td className="px-4 py-2 border">{order.order_id}</td>
+                  <td className="px-4 py-2 border">{order.amount}</td>
+                  <td className="px-4 py-2 border">{order.currency}</td>
+                  <td className="px-4 py-2 border">{order.status}</td>
+                  <td className="px-4 py-2 border">
+                    {order.payment_id || "Payment Failed"}{" "}
+                    {order.payment_id && (
+                      <button
+                        onClick={() =>
+                          handleCopy(order.payment_id, order.order_id)
+                        }
+                        className="ml-2 text-blue-500 hover:text-blue-700 relative group"
+                      >
+                        📋
+                        <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 w-max px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100">
+                          Copy
+                        </span>
+                      </button>
+                    )}
+                    {copiedOrderId === order.order_id && (
+                      <span className="ml-2 text-green-500">Copied!</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
+
     </div>
   );
 };
