@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
-
 const Home = () => {
   const [amount, setAmount] = useState("");
   const [payID, setPayID] = useState("");
@@ -11,15 +10,14 @@ const Home = () => {
   // Fetch all orders from the backend
   const fetchOrders = async () => {
     try {
-      const res = await fetch(`${process.env.REACT_APP_BASE_URL_FRONTEND}/getAllOrders`);
+      const res = await fetch(`${process.env.REACT_APP_BASE_URL_FRONTEND}/getUserData`); // Updated endpoint
       console.log(process.env.REACT_APP_BASE_URL_FRONTEND);
-
 
       if (!res.ok) {
         throw new Error("Failed to fetch orders.");
       }
       const data = await res.json();
-      setOrders(data);
+      setOrders(data.data); // Ensure you're setting the correct data
     } catch (error) {
       console.error("Fetch Orders Error:", error);
       toast.error("Failed to fetch orders.");
@@ -37,7 +35,7 @@ const Home = () => {
     }
 
     try {
-      const res = await fetch(`${process.env.REACT_APP_BASE_URL_FRONTEND}/create-order`, {
+      const res = await fetch(`${process.env.REACT_APP_BASE_URL_FRONTEND}/create-order`, { // Ensure this endpoint matches your backend
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -148,7 +146,7 @@ const Home = () => {
     }
   };
 
-  //copy text
+  // Copy text functionality
   const [copiedOrderId, setCopiedOrderId] = useState(null);
   const handleCopy = (paymentId, orderId) => {
     navigator.clipboard.writeText(paymentId).then(() => {
@@ -271,7 +269,6 @@ const Home = () => {
           </table>
         </div>
       </div>
-
     </div>
   );
 };
