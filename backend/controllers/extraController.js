@@ -7,36 +7,31 @@ async function paymentMethodHandler(req, res) {
     const { event, payload: { payment: { entity } } } = razorpayPayload;
 
     const {
-      id: payment_id, amount, currency, status, order_id, invoice_id,
-      international, method, amount_refunded, refund_status, captured,
-      description, card_id, bank, wallet, vpa, email, contact,
-      notes: { name, type }
+      id: payment_id, amount, currency, status, order_id,
+      amount_refunded, refund_status, captured,
+      description, email, contact,
     } = entity;
 
-    // Query database for existing payment
-    const logQuery = `SELECT payment_id, status FROM rzp_payments WHERE payment_id = $1`;
+    // Query database for existing order
+    const logQuery = `SELECT * FROM orders WHERE payment_id = $1`;
     const existingLogPromise = pool.query(logQuery, [payment_id]);
 
     const [existingLogResult] = await Promise.all([existingLogPromise]);
 
     if (existingLogResult.rowCount > 0) {
-      if (existingLogResult.rows[0].status !== "captured") {
-        const updateQuery = `UPDATE rzp_payments SET status = $1 WHERE payment_id = $2`;
-        await pool.query(updateQuery, [status, payment_id]);
+      if (existingLogResult.rows[0].status !== "paid") {
+        const updateQuery = `UPDATE orders SET status = $1 WHERE payment_id = $2`;
+        await pool.query(updateQuery, ["paid", payment_id]);
       } else {
         return res.status(200).json({ status: "success", message: "Payment already captured" });
       }
     } else {
-      // Insert new payment into the database
-      const insertQuery = `INSERT INTO rzp_payments 
-        (payment_id, amount, currency, status, order_id, invoice_id, international, method, 
-         amount_refunded, refund_status, captured, description, card_id, bank, wallet, vpa, 
-         email, contact, name, type)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)`;
+      // Insert new order into the database if not found
+      const insertQuery = `INSERT INTO orders 
+        (order_id, amount, currency, status, payment_id, description, email, contact)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`;
       await pool.query(insertQuery, [
-        payment_id, amount, currency, status, order_id, invoice_id, international, method, 
-        amount_refunded, refund_status, captured, description, card_id, bank, wallet, vpa, 
-        email, contact, name, type
+        order_id, amount, currency, status, payment_id, description, email, contact
       ]);
     }
 
@@ -55,9 +50,9 @@ async function paymentMethodHandler(req, res) {
 async function getUserData(req, res) {
   try {
     const getAllUserData = `
-      SELECT payment_id, amount, order_id, email, contact 
-      FROM rzp_payments 
-      WHERE status = 'captured'
+      SELECT order_id, amount, email, contact 
+      FROM orders 
+      WHERE status = 'paid'
     `;
 
     const existingLogResult = await pool.query(getAllUserData);

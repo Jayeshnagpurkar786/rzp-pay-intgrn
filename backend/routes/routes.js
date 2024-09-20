@@ -8,10 +8,10 @@ const router = express.Router();
 router.post('/webhook', paymentMethodHandler);
 router.get('/getAllUserData', getUserData);
 
-//in use
-router.post('/create-order',paymentMethod.createPayment)
-router.post('/verify-payment',paymentMethod.verifyPayment)
-router.post('/refund',paymentMethod.paymentRefund)
-router.get('/getAllOrders',paymentMethod.getAllOrders)
+router.post('/create-order', paymentMethod.createPayment)
+router.post('/verify-payment', paymentMethod.verifyPayment)
+router.post('/refund', paymentMethod.paymentRefund)
+router.get('/getAllOrders', paymentMethod.getAllOrders)
+
 
 module.exports = router;

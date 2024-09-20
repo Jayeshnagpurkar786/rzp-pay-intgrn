@@ -6,19 +6,24 @@ const Home = () => {
   const [payID, setPayID] = useState("");
   const [amount2, setAmount2] = useState("");
   const [orders, setOrders] = useState([]);
+  const [copiedOrderId, setCopiedOrderId] = useState(null);
 
-  // Fetch all orders from the backend
   const fetchOrders = async () => {
     try {
-      const res = await fetch(`${process.env.REACT_APP_BASE_URL}/getAllOrders`);
-      console.log(process.env.REACT_APP_BASE_URL);
-
-
-      if (!res.ok) {
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/getAllOrders`);
+      
+      if (!response.ok) {
         throw new Error("Failed to fetch orders.");
       }
-      const data = await res.json();
-      setOrders(data);
+  
+      const data = await response.json();
+      console.log("Fetched Orders Data:", data);
+  
+      if (data.success && Array.isArray(data.data)) {
+        setOrders(data.data);
+      } else {
+        throw new Error("Invalid data format received from server.");
+      }
     } catch (error) {
       console.error("Fetch Orders Error:", error);
       toast.error("Failed to fetch orders.");
@@ -26,7 +31,7 @@ const Home = () => {
   };
 
   useEffect(() => {
-    fetchOrders(); // Fetch orders when the component mounts
+    fetchOrders();
   }, []);
 
   const handlePayment = async () => {
@@ -147,8 +152,6 @@ const Home = () => {
     }
   };
 
-  //copy text
-  const [copiedOrderId, setCopiedOrderId] = useState(null);
   const handleCopy = (paymentId, orderId) => {
     navigator.clipboard.writeText(paymentId).then(() => {
       setCopiedOrderId(orderId);
@@ -158,70 +161,41 @@ const Home = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
-      <div className="flex flex-row mt-9 space-x-4">
-        {/* Payment Section */}
-        <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold mb-4">Payment </h1>
-          <label
-            htmlFor="amount"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Amount
-          </label>
-          <input
-            id="amount"
-            type="number"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className="block w-full p-2 border border-gray-300 rounded-md mb-4"
-            placeholder="Enter amount"
-          />
-          <button
-            onClick={handlePayment}
-            className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600"
-          >
-            Pay Now
-          </button>
-        </div>
+      {/* Payment Section */}
+      <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md mb-4">
+        <h2 className="text-xl font-bold mb-4">Make a Payment</h2>
+        <input
+          type="number"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          placeholder="Amount"
+          className="border p-2 w-full mb-4"
+        />
+        <button onClick={handlePayment} className="bg-blue-500 text-white p-2 rounded">
+          Pay
+        </button>
+      </div>
 
-        {/* Refund Section */}
-        <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold mb-4">Refund</h1>
-          <label
-            htmlFor="payID"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Razorpay ID
-          </label>
-          <input
-            id="payID"
-            type="text"
-            value={payID}
-            onChange={(e) => setPayID(e.target.value)}
-            className="block w-full p-2 border border-gray-300 rounded-md mb-4"
-            placeholder="Enter Razorpay ID"
-          />
-          <label
-            htmlFor="amount2"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Refund Amount
-          </label>
-          <input
-            id="amount2"
-            type="number"
-            value={amount2}
-            onChange={(e) => setAmount2(e.target.value)}
-            className="block w-full p-2 border border-gray-300 rounded-md mb-4"
-            placeholder="Enter amount"
-          />
-          <button
-            onClick={handleRefund}
-            className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600"
-          >
-            Refund
-          </button>
-        </div>
+      {/* Refund Section */}
+      <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md mb-4">
+        <h2 className="text-xl font-bold mb-4">Request a Refund</h2>
+        <input
+          type="text"
+          value={payID}
+          onChange={(e) => setPayID(e.target.value)}
+          placeholder="Payment ID"
+          className="border p-2 w-full mb-2"
+        />
+        <input
+          type="number"
+          value={amount2}
+          onChange={(e) => setAmount2(e.target.value)}
+          placeholder="Refund Amount"
+          className="border p-2 w-full mb-4"
+        />
+        <button onClick={handleRefund} className="bg-red-500 text-white p-2 rounded">
+          Refund
+        </button>
       </div>
 
       {/* Orders Section */}
@@ -249,9 +223,7 @@ const Home = () => {
                     {order.payment_id || "Payment Failed"}{" "}
                     {order.payment_id && (
                       <button
-                        onClick={() =>
-                          handleCopy(order.payment_id, order.order_id)
-                        }
+                        onClick={() => handleCopy(order.payment_id, order.order_id)}
                         className="ml-2 text-blue-500 hover:text-blue-700 relative group"
                       >
                         📋
@@ -270,7 +242,6 @@ const Home = () => {
           </table>
         </div>
       </div>
-
     </div>
   );
 };
