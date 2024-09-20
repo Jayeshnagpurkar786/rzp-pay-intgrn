@@ -10,14 +10,15 @@ const Home = () => {
   // Fetch all orders from the backend
   const fetchOrders = async () => {
     try {
-      const res = await fetch(`${process.env.REACT_APP_BASE_URL_FRONTEND}/getUserData`); // Updated endpoint
-      console.log(process.env.REACT_APP_BASE_URL_FRONTEND);
+      const res = await fetch(`${process.env.REACT_APP_BASE_URL}/getAllOrders`);
+      console.log(process.env.REACT_APP_BASE_URL);
+
 
       if (!res.ok) {
         throw new Error("Failed to fetch orders.");
       }
       const data = await res.json();
-      setOrders(data.data); // Ensure you're setting the correct data
+      setOrders(data);
     } catch (error) {
       console.error("Fetch Orders Error:", error);
       toast.error("Failed to fetch orders.");
@@ -35,7 +36,7 @@ const Home = () => {
     }
 
     try {
-      const res = await fetch(`${process.env.REACT_APP_BASE_URL_FRONTEND}/create-order`, { // Ensure this endpoint matches your backend
+      const res = await fetch(`${process.env.REACT_APP_BASE_URL}/create-order`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -68,7 +69,7 @@ const Home = () => {
     }
 
     const options = {
-      key: process.env.REACT_APP_RAZORPAY_KEY_ID_FRONTEND,
+      key: process.env.REACT_APP_RAZORPAY_KEY_ID,
       amount: data.amount,
       currency: data.currency,
       name: "Payment Test Mode",
@@ -76,7 +77,7 @@ const Home = () => {
       order_id: data.id,
       handler: async (response) => {
         try {
-          const res = await fetch(`${process.env.REACT_APP_BASE_URL_FRONTEND}/verify-payment`, {
+          const res = await fetch(`${process.env.REACT_APP_BASE_URL}/verify-payment`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -120,7 +121,7 @@ const Home = () => {
     }
 
     try {
-      const res = await fetch(`${process.env.REACT_APP_BASE_URL_FRONTEND}/refund`, {
+      const res = await fetch(`${process.env.REACT_APP_BASE_URL}/refund`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -146,7 +147,7 @@ const Home = () => {
     }
   };
 
-  // Copy text functionality
+  //copy text
   const [copiedOrderId, setCopiedOrderId] = useState(null);
   const handleCopy = (paymentId, orderId) => {
     navigator.clipboard.writeText(paymentId).then(() => {
@@ -269,6 +270,7 @@ const Home = () => {
           </table>
         </div>
       </div>
+
     </div>
   );
 };

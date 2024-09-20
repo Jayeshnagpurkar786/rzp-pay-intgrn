@@ -11,30 +11,34 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
     "body-parser": "^1.20.2",
     "config": "^3.3.12",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
+    "crypto-browserify": "^3.12.0",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2",
+    "express": "^4.21.0",
     "nodemon": "^3.1.4",
+    "os-browserify": "^0.3.0",
+    "path-browserify": "^1.0.1",
     "pg": "^8.12.0",
     "razorpay": "^2.9.4",
-    "sequelize": "^6.37.3",
-    "sequelize-cli": "^6.6.2",
-    "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1",
-    "winston": "^3.14.2",
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.4.1",
     "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
+    "sequelize": "^6.37.3",
+    "sequelize-cli": "^6.6.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "web-vitals": "^2.1.4",
+    "winston": "^3.14.2"
   },
   "devDependencies": {
+    "dotenv-webpack": "^8.1.0",
     "tailwindcss": "^3.4.10"
   },
   "author": "",
@@ -57,5 +61,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "keywords": []
 }
