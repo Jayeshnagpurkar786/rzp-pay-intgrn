@@ -3,7 +3,7 @@ const paymentMethod = require('../controllers/paymentMethod');
 const { getUserData,paymentMethodHandler } = require('../controllers/extraController');
 
 
-const router = express.Router();
+const router = express.Router();console.log("database variables")
 //not in use
 router.post('/webhook', paymentMethodHandler);
 router.get('/getAllUserData', getUserData);
