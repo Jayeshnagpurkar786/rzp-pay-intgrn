@@ -1,4 +1,4 @@
-const { pool } = require("../models/database"); // Correctly import pool
+const { pool } = require("../models/database");
 
 // Handles Razorpay payment method via webhook
 async function paymentMethodHandler(req, res) {
@@ -6,33 +6,31 @@ async function paymentMethodHandler(req, res) {
     const razorpayPayload = req.body;
     const { event, payload: { payment: { entity } } } = razorpayPayload;
 
-    const {
-      id: payment_id, amount, currency, status, order_id,
-      amount_refunded, refund_status, captured,
-      description, email, contact,
-    } = entity;
+    const { id: payment_id, amount, currency, status, order_id, description, email, contact } = entity;
 
-    // Query database for existing order
-    const logQuery = `SELECT * FROM orders WHERE payment_id = $1`;
-    const existingLogPromise = pool.query(logQuery, [payment_id]);
-
-    const [existingLogResult] = await Promise.all([existingLogPromise]);
+    // Check for existing order in the rzp_payments table
+    const existingLogResult = await pool.query(
+      `SELECT * FROM rzp_payments WHERE payment_id = $1`,
+      [payment_id]
+    );
 
     if (existingLogResult.rowCount > 0) {
       if (existingLogResult.rows[0].status !== "paid") {
-        const updateQuery = `UPDATE orders SET status = $1 WHERE payment_id = $2`;
-        await pool.query(updateQuery, ["paid", payment_id]);
+        await pool.query(
+          `UPDATE rzp_payments SET status = $1 WHERE payment_id = $2`,
+          ["paid", payment_id]
+        );
       } else {
         return res.status(200).json({ status: "success", message: "Payment already captured" });
       }
     } else {
-      // Insert new order into the database if not found
-      const insertQuery = `INSERT INTO orders 
-        (order_id, amount, currency, status, payment_id, description, email, contact)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`;
-      await pool.query(insertQuery, [
-        order_id, amount, currency, status, payment_id, description, email, contact
-      ]);
+      // Insert new order into the rzp_payments table
+      await pool.query(
+        `INSERT INTO rzp_payments 
+          (order_id, amount, currency, status, payment_id, description, email, contact) 
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [order_id, amount, currency, status, payment_id, description, email, contact]
+      );
     }
 
     if (status === "captured" && event === "payment.captured") {
@@ -46,16 +44,12 @@ async function paymentMethodHandler(req, res) {
   }
 }
 
-// Fetch captured payment data for the user
+// Fetch captured payment data for user
 async function getUserData(req, res) {
   try {
-    const getAllUserData = `
-      SELECT order_id, amount, email, contact 
-      FROM orders 
-      WHERE status = 'paid'
-    `;
-
-    const existingLogResult = await pool.query(getAllUserData);
+    const existingLogResult = await pool.query(
+      `SELECT order_id, amount, email, contact FROM rzp_payments WHERE status = 'paid'`
+    );
 
     if (existingLogResult.rowCount > 0) {
       res.status(200).json({ success: true, data: existingLogResult.rows });

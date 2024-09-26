@@ -1,17 +1,20 @@
 const express = require('express');
-const paymentMethod = require('../controllers/paymentMethod');
-const { getUserData,paymentMethodHandler } = require('../controllers/extraController');
+const router = express.Router();
+const { 
+  createPayment, 
+  verifyPayment, 
+  paymentRefund, 
+  getAllOrders, 
+  getAllUserData, 
+  webhook 
+} = require('../controllers/paymentMethod');
 
-
-const router = express.Router();console.log("database variables")
-//not in use
-router.post('/webhook', paymentMethodHandler);
-router.get('/getAllUserData', getUserData);
-
-router.post('/create-order', paymentMethod.createPayment)
-router.post('/verify-payment', paymentMethod.verifyPayment)
-router.post('/refund', paymentMethod.paymentRefund)
-router.get('/getAllOrders', paymentMethod.getAllOrders)
-
+// Define routes
+router.post('/create-order', createPayment);
+router.post('/verify-payment', verifyPayment);
+router.post('/refund', paymentRefund);
+router.get('/get-all-orders', getAllOrders);
+router.get('/get-all-user-data', getAllUserData);
+router.post('/webhook', webhook);
 
 module.exports = router;
